@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verify OTP | OTP Authentication</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="layout">
+      <div class="shell">
+        <header class="brand">
+          <div class="brand-mark">A</div>
+          <div>
+            <strong>Afghan OTP Auth</strong>
+            <span>Local GSM modem prototype</span>
+          </div>
+        </header>
+        <section class="card">
+          <div id="verification-copy">
+            <h1>Verify your code</h1>
+            <p class="subtitle">Enter the 6-digit OTP sent to <strong id="phone-text"></strong>.</p>
+          </div>
+          <div id="message" class="message" role="alert" aria-live="polite"></div>
+          <div id="demo-code" class="demo-code"></div>
+          <form id="verify-form">
+            <label class="field">
+              <span>One-time password</span>
+              <input class="otp-input" name="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="000000">
+            </label>
+            <div class="meta">
+              <span id="countdown"></span>
+              <button id="resend" class="text-button" type="button">Resend OTP</button>
+            </div>
+            <div class="actions">
+              <button class="button" type="submit">Verify and continue</button>
+              <a class="button secondary" href="/login.html">Use another number</a>
+            </div>
+          </form>
+          <div id="authenticated" class="authenticated">
+            <div class="check">&#10003;</div>
+            <h1>Authenticated</h1>
+            <p class="subtitle">Welcome, <strong id="welcome-name"></strong>. Your phone number has been verified successfully.</p>
+            <button id="logout" class="button secondary" type="button">Log out</button>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="/js/verify.js"></script>
+  </body>
+</html>

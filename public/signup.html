@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign up | OTP Authentication</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="layout">
+      <div class="shell">
+        <header class="brand">
+          <div class="brand-mark">A</div>
+          <div>
+            <strong>Afghan OTP Auth</strong>
+            <span>Local GSM modem prototype</span>
+          </div>
+        </header>
+        <section class="card">
+          <h1>Create account</h1>
+          <p class="subtitle">Register with your mobile number. We will send a one-time verification code by SMS.</p>
+          <div id="message" class="message" role="alert" aria-live="polite"></div>
+          <form id="signup-form">
+            <label class="field">
+              <span>Full name</span>
+              <input name="fullName" autocomplete="name" maxlength="80" required placeholder="Ahmad Rahimi">
+            </label>
+            <label class="field">
+              <span>Afghanistan mobile number</span>
+              <input name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="070 123 4567">
+            </label>
+            <button class="button" type="submit">Send OTP</button>
+          </form>
+          <p class="switch">Already registered? <a href="/login.html">Log in</a></p>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="/js/signup.js"></script>
+  </body>
+</html>
