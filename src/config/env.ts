@@ -2,8 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export type SmsDriver = "mock" | "gsm";
-
+export type SmsDriver = "mock" | "gsm" | "android";
 export interface AppConfig {
   port: number;
   nodeEnv: string;
@@ -19,6 +18,8 @@ export interface AppConfig {
   showMockOtp: boolean;
   gsmDevicePath: string;
   gsmBaudRate: number;
+  androidSmsGatewayUrl: string;
+  androidSmsGatewayToken: string;
 }
 
 function readInteger(name: string, fallback: number): number {
@@ -49,8 +50,8 @@ export function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     process.env.OTP_SECRET ?? "development-only-secret-change-before-deployment";
   const smsDriverValue = process.env.SMS_DRIVER ?? "mock";
 
-  if (smsDriverValue !== "mock" && smsDriverValue !== "gsm") {
-    throw new Error("SMS_DRIVER must be either mock or gsm.");
+  if (smsDriverValue !== "mock" && smsDriverValue !== "gsm" && smsDriverValue !== "android") {
+    throw new Error("SMS_DRIVER must be either mock, gsm, or android.");
   }
   const config: AppConfig = {
     port: readInteger("PORT", 3000),
@@ -66,6 +67,8 @@ export function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     smsDriver: smsDriverValue,
     showMockOtp: readBoolean("SHOW_MOCK_OTP", true),
     gsmDevicePath: process.env.GSM_DEVICE_PATH ?? "/dev/ttyUSB0",
+    androidSmsGatewayUrl: process.env.ANDROID_SMS_GATEWAY_URL ?? "http://10.10.10.240:8080/send-sms",
+    androidSmsGatewayToken: process.env.ANDROID_SMS_GATEWAY_TOKEN ?? "",
     gsmBaudRate: readInteger("GSM_BAUD_RATE", 115200),
     ...overrides,
   };

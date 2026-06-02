@@ -8,6 +8,7 @@ import {
 } from "./services/sms/GsmModemSmsService.js";
 import { MockSmsService } from "./services/sms/MockSmsService.js";
 import type { SmsService } from "./services/sms/SmsService.js";
+import { AndroidPhoneSmsService } from "./services/sms/AndroidPhoneSmsService.js";
 
 const config = loadConfig();
 const database = createDatabase(config.databasePath);
@@ -18,6 +19,11 @@ let exposeMockOtp = false;
 if (config.smsDriver === "mock") {
   smsService = new MockSmsService();
   exposeMockOtp = config.showMockOtp && config.nodeEnv !== "production";
+} else if (config.smsDriver === "android") {
+  smsService = new AndroidPhoneSmsService(
+    config.androidSmsGatewayUrl,
+    config.androidSmsGatewayToken,
+  );
 } else {
   smsService = new GsmModemSmsService(
     new UnconfiguredGsmModemTransport(config.gsmDevicePath, config.gsmBaudRate),
