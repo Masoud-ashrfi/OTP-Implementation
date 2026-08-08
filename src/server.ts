@@ -16,6 +16,7 @@ const repository = new AuthRepository(database);
 
 let smsService: SmsService;
 let exposeMockOtp = false;
+
 if (config.smsDriver === "mock") {
   smsService = new MockSmsService();
   exposeMockOtp = config.showMockOtp && config.nodeEnv !== "production";
@@ -23,6 +24,7 @@ if (config.smsDriver === "mock") {
   smsService = new AndroidPhoneSmsService(
     config.androidSmsGatewayUrl,
     config.androidSmsGatewayToken,
+    config.androidSmsGatewayTimeoutMs,
   );
 } else {
   smsService = new GsmModemSmsService(

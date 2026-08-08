@@ -76,20 +76,24 @@ export class AuthService {
     if (!challenge) {
       throw new AppError(400, "INVALID_CHALLENGE", "This verification request is no longer active.");
     }
+
     const latestChallenge = this.repository.findLatestChallenge(challenge.userId, challenge.purpose);
     if (latestChallenge?.id !== challenge.id) {
       throw new AppError(400, "INVALID_CHALLENGE", "Use the most recently sent OTP or request a new login.");
-    }
-    if (now < challenge.resendAvailableAt) {
-      const waitSeconds = Math.ceil((challenge.resendAvailableAt - now) / 1000);
-      throw new AppError(429, "RESEND_COOLDOWN", `Please wait ${waitSeconds} seconds before requesting another OTP.`, {
-        retryAfterSeconds: waitSeconds,
-      });
     }
 
     const user = this.repository.findUserById(challenge.userId);
     if (!user) {
       throw new AppError(400, "INVALID_CHALLENGE", "This verification request is no longer active.");
+    }
+
+    this.assertSubscriberNotLocked(user.id, now);
+
+    if (now < challenge.resendAvailableAt) {
+      const waitSeconds = Math.ceil((challenge.resendAvailableAt - now) / 1000);
+      throw new AppError(429, "RESEND_COOLDOWN", `Please wait ${waitSeconds} seconds before requesting another OTP.`, {
+        retryAfterSeconds: waitSeconds,
+      });
     }
 
     return this.issueChallenge(user, challenge.purpose);
@@ -104,29 +108,55 @@ export class AuthService {
     if (!challenge || challenge.consumedAt) {
       throw new AppError(400, "INVALID_CHALLENGE", "This verification request is no longer active.");
     }
+
     if (challenge.expiresAt <= now) {
       this.repository.consumeChallenge(challenge.id, now);
       throw new AppError(410, "OTP_EXPIRED", "This OTP has expired. Please request a new one.");
     }
-    if (challenge.attempts >= this.config.otpMaxAttempts) {
-      throw new AppError(429, "OTP_LOCKED", "Too many incorrect attempts. Please request a new OTP.");
-    }
 
-    if (!verifyOtpHash(otp, challenge.otpHash, this.config.otpSecret)) {
-      const attempts = challenge.attempts + 1;
-      const locked = attempts >= this.config.otpMaxAttempts;
-      this.repository.recordFailedAttempt(challenge.id, attempts, locked ? now : null);
-      const message = locked
-        ? "Too many incorrect attempts. Please request a new OTP."
-        : "The OTP is incorrect. Please try again.";
-      throw new AppError(locked ? 429 : 400, locked ? "OTP_LOCKED" : "INCORRECT_OTP", message);
-    }
-
-    this.repository.consumeChallenge(challenge.id, now);
     const user = this.repository.findUserById(challenge.userId);
     if (!user) {
       throw new AppError(400, "INVALID_CHALLENGE", "This verification request is no longer active.");
     }
+
+    this.assertSubscriberNotLocked(user.id, now);
+
+    if (!verifyOtpHash(otp, challenge.otpHash, this.config.otpSecret)) {
+      const challengeAttempts = challenge.attempts + 1;
+      const failureState = this.repository.recordOtpFailure(
+        user.id,
+        this.config.otpMaxAttempts,
+        now + this.config.otpLockoutSeconds * 1000,
+        now,
+      );
+
+      const locked =
+        failureState.lockedUntil !== null && failureState.lockedUntil > now;
+
+      this.repository.recordFailedAttempt(
+        challenge.id,
+        challengeAttempts,
+        locked ? now : null,
+      );
+
+      if (locked) {
+        const retryAfterSeconds = Math.ceil(
+          (failureState.lockedUntil! - now) / 1000,
+        );
+        throw new AppError(
+          429,
+          "OTP_LOCKED",
+          "Too many incorrect attempts. Please try again later.",
+          { retryAfterSeconds },
+        );
+      }
+
+      throw new AppError(400, "INCORRECT_OTP", "The OTP is incorrect. Please try again.");
+    }
+
+    this.repository.consumeChallenge(challenge.id, now);
+    this.repository.resetOtpFailures(user.id, now);
+
     if (challenge.purpose === "signup" && !user.verifiedAt) {
       this.repository.markUserVerified(user.id, now);
       user.verifiedAt = now;
@@ -137,6 +167,8 @@ export class AuthService {
 
   private async issueChallenge(user: UserRecord, purpose: OtpPurpose): Promise<IssuedChallenge> {
     const now = this.now();
+    this.assertSubscriberNotLocked(user.id, now);
+
     const rateWindowStart = now - this.config.otpRateWindowMinutes * 60 * 1000;
     if (this.repository.countChallengesSince(user.phone, rateWindowStart) >= this.config.otpMaxSendsPerWindow) {
       throw new AppError(
@@ -179,6 +211,21 @@ export class AuthService {
       resendAvailableAt: challenge.resendAvailableAt,
       ...(this.exposeMockOtp ? { developmentOtp: otp } : {}),
     };
+  }
+
+  private assertSubscriberNotLocked(userId: string, now: number): void {
+    this.repository.clearExpiredOtpLock(userId, now);
+    const state = this.repository.findOtpFailureState(userId);
+
+    if (state?.lockedUntil && state.lockedUntil > now) {
+      const retryAfterSeconds = Math.ceil((state.lockedUntil - now) / 1000);
+      throw new AppError(
+        429,
+        "OTP_LOCKED",
+        "Too many incorrect attempts. Please try again later.",
+        { retryAfterSeconds },
+      );
+    }
   }
 
   private validateName(input: unknown): string {

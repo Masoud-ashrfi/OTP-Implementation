@@ -5,6 +5,5 @@ export class MockSmsService implements SmsService {
 
   async send(message: SmsMessage): Promise<void> {
     this.sentMessages.push(message);
-    console.info(`[MockSmsService] SMS to ${message.to}: ${message.body}`);
   }
 }

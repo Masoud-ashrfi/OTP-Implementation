@@ -24,6 +24,11 @@ export interface OtpChallengeRecord {
   createdAt: number;
 }
 
+export interface OtpFailureState {
+  failedAttempts: number;
+  lockedUntil: number | null;
+}
+
 interface SessionUserRow {
   id: string;
   full_name: string;
@@ -97,6 +102,67 @@ export class AuthRepository {
       .run(verifiedAt, verifiedAt, id);
   }
 
+  findOtpFailureState(userId: string): OtpFailureState | undefined {
+    const row = this.database
+      .prepare(
+        `SELECT otp_failed_attempts AS failedAttempts, otp_locked_until AS lockedUntil
+         FROM users
+         WHERE id = ?`,
+      )
+      .get(userId) as { failedAttempts: number; lockedUntil: number | null } | undefined;
+
+    return row
+      ? { failedAttempts: row.failedAttempts, lockedUntil: row.lockedUntil }
+      : undefined;
+  }
+
+  clearExpiredOtpLock(userId: string, now: number): void {
+    this.database
+      .prepare(
+        `UPDATE users
+         SET otp_failed_attempts = 0, otp_locked_until = NULL, updated_at = ?
+         WHERE id = ? AND otp_locked_until IS NOT NULL AND otp_locked_until <= ?`,
+      )
+      .run(now, userId, now);
+  }
+
+  recordOtpFailure(
+    userId: string,
+    maxAttempts: number,
+    lockUntil: number,
+    now: number,
+  ): OtpFailureState {
+    this.database
+      .prepare(
+        `UPDATE users
+         SET
+           otp_failed_attempts = otp_failed_attempts + 1,
+           otp_locked_until = CASE
+             WHEN otp_failed_attempts + 1 >= ? THEN ?
+             ELSE otp_locked_until
+           END,
+           updated_at = ?
+         WHERE id = ?`,
+      )
+      .run(maxAttempts, lockUntil, now, userId);
+
+    const state = this.findOtpFailureState(userId);
+    if (!state) {
+      throw new Error("Unable to update OTP failure state for missing user.");
+    }
+    return state;
+  }
+
+  resetOtpFailures(userId: string, now: number): void {
+    this.database
+      .prepare(
+        `UPDATE users
+         SET otp_failed_attempts = 0, otp_locked_until = NULL, updated_at = ?
+         WHERE id = ?`,
+      )
+      .run(now, userId);
+  }
+
   createChallenge(challenge: OtpChallengeRecord): void {
     this.database
       .prepare(
@@ -150,10 +216,10 @@ export class AuthRepository {
       .run(at, userId, purpose);
   }
 
-  recordFailedAttempt(id: string, attempts: number, lockAt: number | null): void {
+  recordFailedAttempt(id: string, attempts: number, consumeAt: number | null): void {
     this.database
       .prepare("UPDATE otp_challenges SET attempts = ?, consumed_at = COALESCE(?, consumed_at) WHERE id = ?")
-      .run(attempts, lockAt, id);
+      .run(attempts, consumeAt, id);
   }
 
   consumeChallenge(id: string, at: number): void {

@@ -1,7 +1,7 @@
 {
   "name": "afghanistan-otp-prototype",
   "version": "1.0.0",
-  "description": "Low-cost SMS OTP authentication prototype using a local GSM modem abstraction.",
+  "description": "Cost-effective SMS OTP authentication prototype using an Android phone as a local SIM-based SMS gateway.",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",

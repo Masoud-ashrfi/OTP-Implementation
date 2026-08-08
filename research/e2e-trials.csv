@@ -1,0 +1,11 @@
+trial,date,time,location,sender_operator,recipient_operator,backend_request_time,gateway_received_at,gateway_completed_at,recipient_arrival_time,gateway_processing_ms,observed_delivery_latency_seconds,otp_received_before_expiry,verification_success,sms_cost_afn,notes
+1,,,,,,,,,,,,,,,
+2,,,,,,,,,,,,,,,
+3,,,,,,,,,,,,,,,
+4,,,,,,,,,,,,,,,
+5,,,,,,,,,,,,,,,
+6,,,,,,,,,,,,,,,
+7,,,,,,,,,,,,,,,
+8,,,,,,,,,,,,,,,
+9,,,,,,,,,,,,,,,
+10,,,,,,,,,,,,,,,
