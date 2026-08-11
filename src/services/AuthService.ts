@@ -198,7 +198,7 @@ export class AuthService {
     try {
       await this.smsService.send({
         to: user.phone,
-        body: `Your Monograph OTP is ${otp}. It expires in ${Math.ceil(this.config.otpExpirySeconds / 60)} minutes.`,
+        body: `Your OTP is ${otp}. It expires in ${Math.ceil(this.config.otpExpirySeconds / 60)} minutes.`,
       });
     } catch {
       this.repository.consumeChallenge(challenge.id, now);
