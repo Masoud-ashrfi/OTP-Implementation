@@ -1,6 +1,0 @@
-route,provider_or_source,initial_or_setup_cost,recurring_or_per_message_cost,currency,date_accessed,contract_or_account_required,evidence_or_url_notes
-SMPP/local operator,,,,,,,
-Managed API,Twilio Verify,,,,,,,
-Managed API,Vonage Verify,,,,,,,
-Managed API,Bird/MessageBird,,,,,,,
-Local Android/SIM gateway,Your tested Afghan SIM,,,,,,,
