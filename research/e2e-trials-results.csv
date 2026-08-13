@@ -1,0 +1,11 @@
+trial,date,time,location,sender_operator,recipient_operator,backend_request_time,gateway_received_at,gateway_completed_at,recipient_arrival_time,gateway_processing_ms,observed_delivery_latency_seconds,otp_received_before_expiry,verification_success,sms_cost_afn,notes
+1,8/10/2026,9:59 AM,"Herat, Afghanistan",Roshan,Roshan,9:59:44,95944157,95945560,10:00:32,1403 ms,48 seconds,TRUE,TRUE,1.30 AFN,No anomaly observed.
+2,8/10/2026,10:11 AM,"Herat, Afghanistan",Roshan,Atoma,10:11:29,101129237,101130832,10:12:30,1595 ms,60 seconds,TRUE,TRUE,1.40 AFN,No anomaly observed.
+3,8/10/2026,10:20 AM,"Herat, Afghanistan",Roshan,Roshan,10:20:14,102014204,102015754,10:22:03,1536 ms,109 seconds,TRUE,TRUE,1.30 AFN,No anomaly observed.
+4,8/10/2026,10:54 AM,"Herat, Afghanistan",Roshan,Roshan,10:54:13,105413985,105414703,10:54:32,718 ms,19 seconds,TRUE,TRUE,1.30 AFN,No anomaly observed.
+5,8/10/2026,10:58 AM,"Herat, Afghanistan",Roshan,Salaam,10:58:49,105849208,105850188,10:59:00,980 ms,10 seconds,TRUE,TRUE,1.40 AFN,No anomaly observed.
+6,8/10/2026,11:12 AM,"Herat, Afghanistan",Roshan,Salaam,11:12:28,111228803,111229622,11:14:06,819 ms,98 seconds,TRUE,TRUE,1.40 AFN,No anomaly observed.
+7,8/11/2026,10:59 AM,"Herat, Afghanistan",Roshan,Atoma,10:59:33,105933875,105934031,10:59:55,155 ms,22 seconds,TRUE,TRUE,1.40 AFN,No anomaly observed.
+8,8/11/2026,11:09 AM,"Herat, Afghanistan",Roshan,Roshan,11:09:53,110953780,110955167,11:11:42,1387 ms,109 seconds,TRUE,TRUE,1.30 AFN,No anomaly observed.
+9,8/11/2026,11:15 AM,"Herat, Afghanistan",Roshan,Salaam,11:15:52,111552989,111553179,11:16:04,190 ms,10 seconds,TRUE,TRUE,1.40 AFN,No anomaly observed.
+10,8/11/2026,11:21 AM,"Herat, Afghanistan",Roshan,Roshan,11:21:48,112148538,112148716,11:23:26,177 ms,98 seconds,TRUE,TRUE,1.30 AFN,No anomaly observed.
